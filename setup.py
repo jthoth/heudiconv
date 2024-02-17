@@ -21,30 +21,9 @@ def main():
     with open(info_file) as infofile:
         exec(infofile.read(), globals(), ldict)
 
-    try:
-        import versioningit
-    except ImportError:
-        # versioningit isn't installed; assume we're building a Debian package
-        # from an sdist on an older Debian that doesn't support pybuild
-        vglobals = {}
-        with open(op.join(op.dirname(__file__), "heudiconv", "_version.py")) as fp:
-            exec(fp.read(), vglobals)
-        kwargs = {"version": vglobals["__version__"]}
-    else:
-        kwargs = {}
+    
+    kwargs = {"version": '0.11.6'}
 
-    def findsome(subdir, extensions):
-        """Find files under subdir having specified extensions
-
-        Leading directory (datalad) gets stripped
-        """
-        return [
-            f.split(op.sep, 1)[1] for f in findall(subdir)
-            if op.splitext(f)[-1].lstrip('.') in extensions
-        ]
-    # Only recentish versions of find_packages support include
-    # heudiconv_pkgs = find_packages('.', include=['heudiconv*'])
-    # so we will filter manually for maximal compatibility
     heudiconv_pkgs = [pkg for pkg in find_packages('.') if pkg.startswith('heudiconv')]
 
 
