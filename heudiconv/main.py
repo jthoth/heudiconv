@@ -394,21 +394,3 @@ def workflow(*, dicom_dir_template=None, files=None, subjs=None,
 
         lgr.info("PROCESSING DONE: {0}".format(
             str(dict(subject=sid, outdir=study_outdir, session=session))))
-
-        if datalad:
-            from .external.dlad import add_to_datalad
-            msg = "Converted subject %s" % dl_msg
-            # TODO:  whenever propagate to supers work -- do just
-            # ds.save(msg=msg)
-            #  also in batch mode might fail since we have no locking ATM
-            #  and theoretically no need actually to save entire study
-            #  we just need that
-            add_to_datalad(outdir, study_outdir, msg, bids_options)
-
-    # if bids:
-    #     # Let's populate BIDS templates for folks to take care about
-    #     for study_outdir in processed_studydirs:
-    #         populate_bids_templates(study_outdir)
-    #
-    # TODO: record_collection of the sid/session although that information
-    # is pretty much present in .heudiconv/SUBJECT/info so we could just poke there

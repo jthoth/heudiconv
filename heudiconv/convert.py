@@ -532,51 +532,6 @@ def convert(items, converter, scaninfo_suffix, custom_callable, with_prov,
         # add the taskname field to the json file(s):
         add_taskname_to_infofile(bids_outfiles)
 
-        if len(bids_outfiles) > 1:
-            lgr.warning("For now not embedding BIDS and info generated "
-                        ".nii.gz itself since sequence produced "
-                        "multiple files")
-        elif not bids_outfiles:
-            lgr.debug("No BIDS files were produced, nothing to embed to then")
-        elif outname and not min_meta:
-            embed_metadata_from_dicoms(bids_options, item_dicoms, outname, outname_bids,
-                                       prov_file, scaninfo, tempdirs, with_prov)
-        if scaninfo and op.exists(scaninfo):
-            lgr.info("Post-treating %s file", scaninfo)
-            treat_infofile(scaninfo)
-
-    #     # this may not always be the case: ex. fieldmap1, fieldmap2
-    #     # will address after refactor
-    #     if outname and op.exists(outname):
-    #         set_readonly(outname)
-
-    #     if custom_callable is not None:
-    #         custom_callable(*item)
-
-    # # Populate "IntendedFor" for fmap files if requested in heuristic
-    # if populate_intended_for_opts is not None:
-    #     # Because fmap files can only be used to correct for distortions in images
-    #     # collected within the same scanning session, find unique subject/session
-    #     # combinations from the outname in each item:
-    #     outnames = [item[0] for item in items]
-    #     # - grab "sub-<sID>[/ses-<ses>]", and keep only unique ones:
-    #     try:
-    #         sessions = set(
-    #             re.search(
-    #                 'sub-(?P<subj>[a-zA-Z0-9]*)([{0}_]ses-(?P<ses>[a-zA-Z0-9]*))?'.format(op.sep),
-    #                 oname
-    #             ).group(0)
-    #             for oname in outnames
-    #         )
-    #     except AttributeError:
-    #         # "sub-<sID>[/ses-<ses>]" is not present, so this is not BIDS compliant
-    #         # and it doesn't make sense to add "IntendedFor":
-    #         sessions = set()
-
-    #     for ses in sessions:
-    #         session_path = op.join(outdir, ses)
-    #         populate_intended_for(session_path, **populate_intended_for_opts)
-
 
 def convert_dicom(item_dicoms, bids_options, prefix,
                   outdir, tempdirs, symlink, overwrite):
