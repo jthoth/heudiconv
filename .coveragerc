@@ -1,0 +1,3 @@
+[run]
+include = heudiconv/*
+          setup.py

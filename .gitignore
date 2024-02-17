@@ -1,0 +1,11 @@
+*.pyc
+.cache/
+.coverage
+*.egg-info/
+.idea/
+venvs/
+_build/
+build/
+dist/
+.vscode/
+_version.py
