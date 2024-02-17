@@ -5,7 +5,6 @@ import os
 import sys
 from argparse import ArgumentParser
 
-from .. import __version__
 from ..main import workflow
 
 lgr = logging.getLogger(__name__)
@@ -28,7 +27,7 @@ def get_parser():
     docstr = ("""Example:
              heudiconv -d 'rawdata/{subject}' -o . -f heuristic.py -s s1 s2 s3""")
     parser = ArgumentParser(description=docstr)
-    parser.add_argument('--version', action='version', version=__version__)
+    parser.add_argument('--version', action='version', version='0.0.0')
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
         '-d', '--dicom_dir_template',

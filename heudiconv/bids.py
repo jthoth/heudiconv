@@ -30,7 +30,6 @@ from .utils import (
     remove_suffix,
     remove_prefix,
 )
-from . import __version__
 
 lgr = logging.getLogger(__name__)
 
@@ -278,7 +277,7 @@ def tuneup_bids_json_files(json_files):
         # Those files should not have our version field already - should have been
         # freshly produced
         assert HEUDICONV_VERSION_JSON_KEY not in json_
-        json_[HEUDICONV_VERSION_JSON_KEY] = str(__version__)
+        json_[HEUDICONV_VERSION_JSON_KEY] = str('0.0.0')
         save_json(jsonfile, json_)
 
     # Load the beast

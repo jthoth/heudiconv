@@ -3,7 +3,7 @@ import os.path as op
 import sys
 from glob import glob
 
-from . import __version__, __packagename__
+from . import __packagename__
 from .bids import populate_bids_templates, tuneup_bids_json_files, populate_intended_for
 from .convert import prep_conversion
 from .due import due, Doi
@@ -169,7 +169,7 @@ def ensure_heuristic_arg(heuristic=None):
     Doi('10.5281/zenodo.1012598'),
     path='heudiconv',
     description='Flexible DICOM converter for organizing brain imaging data',
-    version=__version__,
+    version='0.0.0',
     cite_module=True)
 def workflow(*, dicom_dir_template=None, files=None, subjs=None,
              converter='dcm2niix', outdir='.', locator=None, conv_outdir=None,
@@ -302,7 +302,7 @@ def workflow(*, dicom_dir_template=None, files=None, subjs=None,
         lgr.warning("Could not check for version updates: %s", str(e))
 
     lgr.info(INIT_MSG(packname=__packagename__,
-                      version=__version__,
+                      version='0.0.0',
                       latest=(latest or {}).get("version", "Unknown")))
 
     if command:
