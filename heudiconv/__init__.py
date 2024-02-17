@@ -2,7 +2,6 @@
 import logging
 import os
 from .info import __packagename__
-from ._version import __version__
 
 # Rudimentary logging support.
 lgr = logging.getLogger(__name__)
