@@ -51,10 +51,10 @@ def conversion_info(subject, outdir, info, filegroup, ses):
     for key, items in info.items():
         if not items:
             continue
+        
         template, outtype = key[0], key[1]
-        # So no annotation_classes of any kind!  so if not used -- what was the
-        # intention???? XXX
         outpath = outdir
+
         for idx, itemgroup in enumerate(items):
             if not isinstance(itemgroup, list):
                 itemgroup = [itemgroup]
@@ -64,29 +64,27 @@ def conversion_info(subject, outdir, info, filegroup, ses):
                     parameters = {k: v for k, v in item.items()}
                     item = parameters['item']
                     del parameters['item']
-                # some helper meta-varaibles
+
                 parameters.update(dict(
                     item=idx + 1,
                     subject=subject,
                     seqitem=item,
                     subindex=subindex + 1,
-                    session='ses-' + str(ses),
+                    session='ses' + str(ses),
                     bids_subject_session_prefix=
                         'sub-%s' % subject + (('_ses-%s' % ses) if ses else ''),
                     bids_subject_session_dir=
                         'sub-%s' % subject + (('/ses-%s' % ses) if ses else ''),
-                    # referring_physician_name
-                    # study_description
                     ))
                 try:
                     files = filegroup[item]
                 except KeyError:
                     files = filegroup[str(item)]
                 outprefix = template.format(**parameters)
-                convert_info.append((op.join(outpath, outprefix),
-                                    outtype, files))
+                convert_info.append(
+                    (op.join(f'{outpath}ses{ses}', outprefix),outtype, files)
+                )
     return convert_info
-
 
 def prep_conversion(sid, dicoms, outdir, heuristic, converter, anon_sid,
                     anon_outdir, with_prov, ses, bids_options, seqinfo,

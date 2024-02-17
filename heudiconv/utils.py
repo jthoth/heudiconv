@@ -25,30 +25,38 @@ from json.decoder import JSONDecodeError
 
 
 seqinfo_fields = [
-    'total_files_till_now',  # 0
-    'example_dcm_file',      # 1
-    'series_id',             # 2
-    'dcm_dir_name',          # 3
-    'series_files',          # 4
-    'unspecified',           # 5
-    'dim1', 'dim2', 'dim3', 'dim4', # 6, 7, 8, 9
-    'TR', 'TE',              # 10, 11
-    'protocol_name',         # 12
-    'is_motion_corrected',   # 13
-    'is_derived',            # 14
-    'patient_id',            # 15
-    'study_description',     # 16
-    'referring_physician_name', # 17
-    'series_description',    # 18
-    'sequence_name',         # 19
-    'image_type',            # 20
-    'accession_number',      # 21
-    'patient_age',           # 22
-    'patient_sex',           # 23
-    'date',                  # 24
-    'series_uid',            # 25
-    'time',                  # 26
+    'example_dcm_file',  
+    'series_id',  
+    'dcm_dir_name',   
+    'series_files',
+    'unspecified', 
+    'dim1', 'dim2', 'dim3', 'dim4',
+    'TR', 'TE',
+    'protocol_name', 
+    'is_motion_corrected',
+    'is_derived', 
+    'patient_id', 
+    'institution',
+    'manufacturer',
+    'manufacturer_model',
+    'study_description', 
+    'referring_physician_name',
+    'series_description',
+    'sequence_name',
+    'image_type', 
+    'accession_number',
+    'patient_age', 
+    'patient_sex', 
+    'birthdate',
+    'date',  
+    'series_uid', 
+    'time',
+    'magneticfield',
+    'is_contrast',
+    'orientation',
+    'uniformity'
 ]
+
 
 SeqInfo = namedtuple('SeqInfo', seqinfo_fields)
 

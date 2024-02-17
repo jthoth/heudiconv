@@ -4,7 +4,8 @@ import os.path as op
 import logging
 from collections import OrderedDict
 import tarfile
-
+from os import path
+from nibabel import aff2axcodes
 from .external.pydicom import dcm
 from .utils import (
     get_typed_attr,
@@ -13,7 +14,7 @@ from .utils import (
     SeqInfo,
     set_readonly,
 )
-
+from . import rut_chile
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -24,49 +25,69 @@ lgr = logging.getLogger(__name__)
 total_files = 0
 
 
-def create_seqinfo(mw, series_files, series_id):
-    """Generate sequence info
+orientations = {
+    'P': 'cor', 'A': 'cor',
+    'L': 'sag', 'R': 'sag',
+    'I': 'axial', 'S': 'axial'
+} 
 
-    Parameters
-    ----------
-    mw: MosaicWrapper
-    series_files: list
-    series_id: str
+
+def create_seqinfo(mw, series_files, series_id):
+    """This method is extended from heudiconv project for applying 
+    studies generalization.
+
+    Args:
+        mw (_type_): _description_
+        series_files (_type_): _description_
+        series_id (_type_): _description_
+
+    Returns:
+        _type_: _description_
     """
+
     dcminfo = mw.dcm_data
     accession_number = dcminfo.get('AccessionNumber')
-
-    # TODO: do not group echoes by default
     size = list(mw.image_shape) + [len(series_files)]
+
+    
+    orientation, uniformity, is_contrast = get_extra_information(mw, size[2])
+
     if len(size) < 4:
         size.append(1)
 
-    # parse DICOM for seqinfo fields
     TR = get_typed_attr(dcminfo, "RepetitionTime", float, -1000) / 1000
     TE = get_typed_attr(dcminfo, "EchoTime", float, -1)
+         
+
+
     refphys = get_typed_attr(dcminfo, "ReferringPhysicianName", str, "")
     image_type = get_typed_attr(dcminfo, "ImageType", tuple, ())
     is_moco = 'MOCO' in image_type
-    series_desc = get_typed_attr(dcminfo, "SeriesDescription", str, "")
 
-    if dcminfo.get([0x18, 0x24]):
-        # GE and Philips
+    series_desc = get_typed_attr(dcminfo, "SeriesDescription", str, "")
+    
+    if dcminfo.get([0x18, 0x24]): 
         sequence_name = dcminfo[0x18, 0x24].value
     elif dcminfo.get([0x19, 0x109c]):
-        # Siemens
         sequence_name = dcminfo[0x19, 0x109c].value
     else:
         sequence_name = ""
+    
+    identification = dcminfo.get('PatientID')
 
-    # initialized in `group_dicoms_to_seqinfos`
-    global total_files
-    total_files += len(series_files)
+    try:
+        if not rut_chile.is_valid_rut(identification):
+            identification = dcminfo.get('RETIRED_OtherPatientIDs')    
+        if not rut_chile.is_valid_rut(identification):
+            items = dcminfo.get('OtherPatientIDsSequence')
+            # TODO evaluate cases of ids are missing
+    except:
+        pass
 
-    seqinfo = SeqInfo(
-        total_files_till_now=total_files,
-        example_dcm_file=op.basename(series_files[0]),
+    return SeqInfo(
+        example_dcm_file=path.basename(series_files[0]),
         series_id=series_id,
-        dcm_dir_name=op.basename(op.dirname(series_files[0])),
+        dcm_dir_name=path.basename(path.dirname(series_files[0])),
         series_files=len(series_files),
         unspecified="",
         dim1=size[0],
@@ -79,21 +100,57 @@ def create_seqinfo(mw, series_files, series_id):
         is_motion_corrected=is_moco,
         is_derived='derived' in [x.lower() for x in image_type],
         patient_id=dcminfo.get('PatientID'),
+        institution=dcminfo.get('InstitutionName'),
+        manufacturer=dcminfo.get('Manufacturer'),
+        manufacturer_model=dcminfo.get('ManufacturerModelName'),
         study_description=dcminfo.get('StudyDescription'),
         referring_physician_name=refphys,
         series_description=series_desc,
         sequence_name=sequence_name,
         image_type=image_type,
         accession_number=accession_number,
-        # For demographics to populate BIDS participants.tsv
         patient_age=dcminfo.get('PatientAge'),
         patient_sex=dcminfo.get('PatientSex'),
+        birthdate=dcminfo.get('PatientBirthDate'),
         date=dcminfo.get('AcquisitionDate'),
         series_uid=dcminfo.get('SeriesInstanceUID'),
         time=dcminfo.get('AcquisitionTime'),
+        magneticfield=dcminfo.get('MagneticFieldStrength'),
+        is_contrast=is_contrast,
+        orientation=orientation,
+        uniformity=uniformity
     )
-    return seqinfo
 
+
+def get_extra_information(mw, dim3):
+    """_summary_
+
+    Args:
+        mw (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    orientation, uniformity, is_contrast = 'unk', 'iso', False
+    
+    
+    if isinstance(mw.dcm_data.get('ContrastBolusAgent'), str):
+        is_contrast = True
+    elif mw.dcm_data.get('ScanOptions'):
+        is_contrast = not isinstance(
+            mw.dcm_data.get('ScanOptions'), str
+        )
+   
+    try:
+        orientation = orientations.get(aff2axcodes(mw.affine)[-1])  
+    except:
+        pass
+    
+    if dim3 < 100:
+        uniformity = 'aniso'
+
+    return orientation, uniformity, is_contrast
 
 def validate_dicom(fl, dcmfilter):
     """
