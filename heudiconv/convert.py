@@ -100,8 +100,6 @@ def prep_conversion(sid, dicoms, outdir, heuristic, converter, anon_sid,
         if not sid:
             raise ValueError(
                 "BIDS requires alphanumeric subject ID. Got an empty value")
-        if not sid.isalnum():  # alphanumeric only
-            sid, old_sid = convert_sid_bids(sid)
 
     if not anon_sid:
         anon_sid = sid
@@ -194,12 +192,7 @@ def prep_conversion(sid, dicoms, outdir, heuristic, converter, anon_sid,
         write_config(edit_file, info)
         save_json(filegroup_file, filegroup)
 
-    if bids_options is not None:
-        # the other portion of the path would mimic BIDS layout
-        # so we don't need to worry here about sub, ses at all
-        tdir = anon_outdir
-    else:
-        tdir = op.join(anon_outdir, anon_sid)
+    tdir = op.join(anon_outdir, anon_sid)
 
     if converter.lower() != 'none':
         lgr.info("Doing conversion using %s", converter)

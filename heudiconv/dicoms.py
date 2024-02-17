@@ -156,14 +156,20 @@ def validate_dicom(fl, dcmfilter):
     """
     Parse DICOM attributes. Returns None if not valid.
     """
+    _gobal_error = 0
+    
     mw = dw.wrapper_from_file(fl, force=True, stop_before_pixels=True)
     # clean series signature
     for sig in ('iop', 'ICE_Dims', 'SequenceName'):
         try:
             del mw.series_signature[sig]
         except KeyError:
-            pass
-    # Workaround for protocol name in private siemens csa header
+            _gobal_error += 1
+            pass     # Workaround for protocol name in private siemens csa header
+     
+    if _gobal_error == 3:
+        return 
+    
     if not getattr(mw.dcm_data, 'ProtocolName', '').strip():
         mw.dcm_data.ProtocolName = parse_private_csa_header(
             mw.dcm_data, 'ProtocolName', 'tProtocolName'
