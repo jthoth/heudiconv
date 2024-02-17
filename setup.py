@@ -22,8 +22,6 @@ def main():
         exec(infofile.read(), globals(), ldict)
 
     
-    kwargs = {"version": '0.11.6'}
-
     heudiconv_pkgs = [pkg for pkg in find_packages('.') if pkg.startswith('heudiconv')]
 
 
@@ -51,7 +49,6 @@ def main():
                         op.join('data', 'sample_nifti*'),
             ],
         },
-        **kwargs,
     )
 
 
